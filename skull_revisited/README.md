@@ -8,7 +8,7 @@
 
 ### Some additional concerns
 
-Please, do note that the legacy x86_64 IO space of 1024 ports remains intact, while PCIe is mainly
+Please, do note that the legacy x86(_64) 64K IO port space remains intact, while PCIe is mainly
 used for MMIO.
 
 please, execute the command:
@@ -29,7 +29,8 @@ https://en.wikipedia.org/wiki/COM_(hardware_interface)
 ### HW initialization
 
 In the context of the skull driver it is still not known how the IO HW initialization should be
-performed. Probably none, since it is done by the UEFI/kernel bringup.
+performed. Probably none, since it is done by the UEFI/kernel bringup (devices were already
+allocated and initialized), thus the additional HW initialization (in this context) will fail.
 
 Please, do note that there is NO BIOS driving FW, rather UEFI FW. Thus, Extension ROMs are (for
 already a long time) obsolete.
@@ -59,9 +60,9 @@ already a long time) obsolete.
 	[19631.497415] Insert the skull loadable module
 	[19631.497429] resource sanity check: requesting [mem 0x000a0000-0x000fffff], which spans more than PCI Bus 0000:00 [mem 0x000a0000-0x000bffff window]
 	[19631.497433] caller skull_init+0x1d/0x120 [skull] mapping multiple BARs
-	[19631.497439] a0000: empty
-	[19631.497442] b0000: empty
-	[19631.497443] c0000: empty
+	[19631.497439] a0000: EMPTY
+	[19631.497442] b0000: EMPTY
+	[19631.497443] c0000: EMPTY
 	[19631.497444] d0000: ROM
 	[19631.497445] e0000: RAM
 	[19631.497446] f0000: ROM

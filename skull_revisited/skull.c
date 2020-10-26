@@ -29,7 +29,7 @@
 
 #include <linux/kernel.h> /* printk */
 #include <linux/fs.h>
-#include <linux/ioport.h>
+#include <linux/ioport.h> /* struct resource */
 #include <linux/errno.h>
 // #include <asm/system.h> /* cli(), *_flags ==>> obsolete dir/file.h */
 #include <linux/mm.h> /* vremap (2.0) */
@@ -72,10 +72,15 @@ int skull_init_board(unsigned int port)
 /* Detect the the device if the region is still free */
 static int skull_detect(unsigned int port, unsigned int range)
 {
-//	int err;
+	/*
+	 * Obsolete code
+	 *
+	 * int err;
+	 *
+	 * if ((err = request_region (port, range, "COM2")) < 0)
+	 *	return err; // busy
+	 */
 
-//	if ((err = request_region (port, range, "COM2")) < 0)
-//		return err; /* busy */
 	if (skull_probe_hw(port, range) != 0)
 		return -ENODEV; /* not found */
 	request_region(port, range, "COM2"); /* "Can't fail" */
@@ -96,7 +101,7 @@ static int skull_detect(unsigned int port, unsigned int range)
  * value was assigned by insmod to "skull_port_base"
  */
 
-static int skull_port_base=0; /* 0 forces autodetection */
+static int skull_port_base = 0; /* 0 forces autodetection */
 module_param(skull_port_base, int, 0);
 
 static int skull_find_hw(void) /* returns the # of devices */
@@ -131,11 +136,16 @@ static int __init skull_init(void)
 	unsigned long flags;          /* Used to hold system flags */
 	unsigned long add, i;
 	void *base;
+	struct resource *local_resource;
 
 	printk(KERN_INFO "Insert the skull loadable module\n");
 
+	local_resource = (struct resource *)vzalloc(sizeof(struct resource));
+
 	/* Use ioremap to get a handle on the ISA region */
 	base = ioremap(ISA_REGION_BEGIN, ISA_REGION_END - ISA_REGION_BEGIN);
+	// printk(KERN_INFO "--- ioremap addr = %p ---\n", base);
+
 	base -= ISA_REGION_BEGIN;  /* Do the offset once */
 
 	/* Probe all the memory hole in STEP steps */
@@ -153,8 +163,17 @@ static int __init skull_init(void)
 		 *  Check for an already allocated region
 		 * if (check_mem_region(add, 2048)) {
 		 */
-		if (request_region(add, STEP, "skull")) {
-			printk(KERN_INFO "%lx: Allocated\n", add);
+		local_resource = request_region(add, STEP, "skull");
+		if (NULL != local_resource) {
+			printk(KERN_INFO "%lx: Region Allocated\n", add);
+			printk(KERN_INFO "local_resource->start %llx\n", local_resource->start);
+			printk(KERN_INFO "local_resource->end %llx\n", local_resource->end);
+			printk(KERN_INFO "local_resource->name %s\n", local_resource->name);
+			printk(KERN_INFO "local_resource->flags %lx\n", local_resource->flags);
+			printk(KERN_INFO "local_resource->desc %lx\n", local_resource->desc);
+			printk(KERN_INFO "local_resource->parent %p\n", local_resource->parent);
+			printk(KERN_INFO "local_resource->sigling %p\n", local_resource->sibling);
+			printk(KERN_INFO "local_resource->child %p\n", local_resource->child);
 			continue;
 		}
 
@@ -188,7 +207,7 @@ static int __init skull_init(void)
 			continue;
 		}
 		if ((oldval^newval) != 0) {  /* Random bits changed: it's empty */
-			printk(KERN_INFO "%lx: empty\n", add);
+			printk(KERN_INFO "%lx: EMPTY\n", add);
 			continue;
 		}
 
@@ -217,8 +236,10 @@ static int __init skull_init(void)
 			if (val && val != 0xff && val != ((unsigned long)radd & 0xff))
 				break;
 		}
-		printk(KERN_INFO "%lx: %s\n", add, i==5 ? "empty" : "ROM");
+		printk(KERN_INFO "%lx: %s\n", add, i==5 ? "EMPTY" : "ROM");
 	}
+
+	vfree(local_resource);
 
 	/* Find the hardware */
 	skull_find_hw();
