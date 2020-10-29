@@ -10,16 +10,18 @@
  * and redistributed in source or binary form, so long as an
  * acknowledgment appears in derived source files.  The citation
  * should list that the code comes from the book "Linux Device
- * Drivers" by Alessandro Rubini and Jonathan Corbet, published
- * by O'Reilly & Associates. No warranty is attached;
- * we cannot take responsibility for errors or fitness for use.
+ * Drivers" by Alessandro Rubini, Jonathan Corbet and Zoran
+ * Stojsavljevic. No warranty is attached; no any one of authors
+ * can take responsibility for errors or fitness for use.
+ *
+ * WARNING: if someone does want to change this code, someone
+ *          should definitely have very good understanding what
+ *          is dealing with/is up to!
  *
  * BUGS:
  *   -it only runs on intel platforms.
- *   -readb() should be used (see short.c): skull doesn't work with 2.1
+ *   -readb() should be used (see short.c).
  */
-
-/* jc: cleaned up, but not yet run for anything */
 
 // #include <linux/config.h>
 #include <linux/module.h>
@@ -144,7 +146,7 @@ static int __init skull_init(void)
 
 	/* Use ioremap to get a handle on the ISA region */
 	base = ioremap(ISA_REGION_BEGIN, ISA_REGION_END - ISA_REGION_BEGIN);
-	// printk(KERN_INFO "--- ioremap addr = %p ---\n", base);
+	printk(KERN_INFO "--- ioremap addr = %lx ---\n", (unsigned long)base);
 
 	base -= ISA_REGION_BEGIN;  /* Do the offset once */
 
