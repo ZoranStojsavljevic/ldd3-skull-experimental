@@ -4,6 +4,10 @@ This is the experimental code developed for some PHY MEM UEFI architecture's and
 mapping exploration by the author. This code works for the author and particular PC
 author uses for the PHY MEM UEFI exploration.
 
+	*-cpu
+		product: Intel(R) Core(TM) i5-4300U CPU @ 1.90GHz
+		vendor: Intel Corp.
+
 Author makes this code available for others for the (possible) experimental exploration
 on their own perils and terms.
 
@@ -81,10 +85,10 @@ Please, execute the following command to see on used PC system:
 	e0000000-efffffff : PCI MMCONFIG 0000 [bus 00-ff]
 	  e00f8000-e00f8fff : Reserved
 	f0000000-fed3ffff : PCI Bus 0000:00
-	  fec00000-fec003ff : IOAPIC 0
+	  fec00000-fec003ff : IOAPIC 0	<<=======	#define IOAPIC	0xFEC00000, default physical address of IO APIC
 	  fed00000-fed003ff : HPET 0
 	    fed00000-fed003ff : PNP0103:00
-	  fed10000-fed17fff : pnp 00:00
+	  fed10000-fed17fff : pnp 00:00	<<=======	#define MCHBAR	0xFED10000, size 32K
 	  fed18000-fed18fff : pnp 00:00
 	  fed19000-fed19fff : pnp 00:00
 	  fed1c000-fed1ffff : Reserved
@@ -108,3 +112,26 @@ Please, execute the following command to see on used PC system:
 	  12da00000-12dc70a7f : Kernel data
 	  12e379000-12e7fffff : Kernel bss
 	34ee00000-34fffffff : RAM buffer
+
+### mmap() usage (after all)!
+
+Author suggests here user space exploration by using user space powerfull mmap() f-n!
+
+Please, do note that mmap() discussion is beyond the scope of this GitHub repo.
+
+Short recap:
+
+https://man7.org/linux/man-pages/man2/mmap.2.html
+
+	void *mmap(void *addr,
+		   size_t length,
+		   int prot,
+		   int flags,
+		   int fd,
+		   off_t offset);
+
+	int munmap(void *addr, size_t length);
+
+Additional net pointers for better understanding:
+
+https://www.cs.uaf.edu/2016/fall/cs301/lecture/11_02_mmap.html

@@ -223,6 +223,7 @@ static unsigned long local_ioremap(
 			printk(KERN_INFO "--- ioremap addr = 0x%lx ---\n", (unsigned long)(base + add));
 			continue;
 		}
+
 		if (0 != (oldval^newval)) {  /* Random bits changed: it's empty */
 			printk(KERN_INFO "0x%lx: EMPTY\n", add);
 			printk(KERN_INFO "--- ioremap addr = 0x%lx ---\n", (unsigned long)(base + add));
@@ -280,29 +281,65 @@ static int __init skull_init(void)
 
 	local_resource = (struct resource *)vmalloc(sizeof(struct resource));
 
+	// 000a0000-000bffff : PCI Bus 0000:00
+	printk(KERN_INFO "--- range 0x000a0000 - 0x000bffff ---\n");
 	phy_mem = local_ioremap(ISA_REGION_BEGIN, PCIE_0000_00_END, BASIC_STEP, "PCI Bus 0000:00", local_resource);
 	if (phy_mem)
 		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
 
+	// 000c0000-000effff - gap according to the /proc/iomem mapping
+	printk(KERN_INFO "--- range 0x000c0000 - 0x000effff ---\n");
 	phy_mem = local_ioremap(ISA_EMPTY_BEGIN, ISA_EMPTY_END, BASIC_STEP, "System RAM", local_resource);
 	if (phy_mem)
 		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
 
+	// 000f0000-000fffff : System ROM
+	printk(KERN_INFO "--- range 0x000f0000 - 0x000fffff ---\n");
 	phy_mem = local_ioremap(SYSTEM_ROM_BEGIN, ISA_REGION_END, BASIC_STEP, "System ROM", local_resource);
 	if (phy_mem)
 		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
 
-	for (i = 1; i < 128; i++) {
-		phy_mem = local_ioremap(i * 0x1000000, (i + 1)*0x1000000, BASIC_STEP, "System RAM", local_resource);
-		if (phy_mem)
-			printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
-	}
-
-	for (i = 1; i < 64; i++) {
+#if 0
+	// 10000000-e0000000 : ???
+	printk(KERN_INFO "--- range 0x10000000 - 0xe0000000 ---\n");
+	for (i = 1; i < 14; i++) {
 		phy_mem = local_ioremap(i * 0x10000000, (i + 1)*0x10000000, 0x1000000, "System RAM", local_resource);
 		if (phy_mem)
 			printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
 	}
+#endif
+
+	// e0000000-e01fffff : PCI MMCONFIG 0000 [bus 00-ff]
+	printk(KERN_INFO "--- range 0xe0000000-0xe01fffff ---\n");
+	phy_mem = local_ioremap(0xe0000000, 0xe0200000, BASIC_STEP, "System RAM", local_resource);
+	if (phy_mem)
+		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
+
+	// feb00000-febfffff
+	printk(KERN_INFO "--- range 0xfeb00000 - 0xfebfffff ---\n");
+	phy_mem = local_ioremap(0xfeb00000, 0xfec00000, BASIC_STEP, "System RAM", local_resource);
+	if (phy_mem)
+		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
+
+	// fec00000-fec003ff : IOAPIC 0 <<== #define IOAPIC 0xFEC00000 - default physical address of IOAPIC
+	printk(KERN_INFO "--- range 0xfec00000 - 0xfec003ff --- #define IOAPIC 0xFEC00000\n");
+	phy_mem = local_ioremap(0xfec000000, 0xfec003ff, 0x100, "System RAM", local_resource);
+	if (phy_mem)
+		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
+
+	// fed10000-fed17fff : MCHBAR <<== #define MCHBAR 0xFED10000 - default physical address of MCHBAR
+	printk(KERN_INFO "--- range 0xfed10000 - 0xfed17fff --- #define MCHBAR 0xFED10000\n");
+	phy_mem = local_ioremap(0xfed10000, 0xfed18000, 0x1000, "System RAM", local_resource);
+	if (phy_mem)
+		printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
+
+	/*
+	 * DANGER: Do NOT test/touch this area!
+	 * fed3ffff-ffffffff INTEL System Space Mem Controller, IOAPIC etc.
+	 * phy_mem = local_ioremap(0xfed3ffff, 0x100000000, BASIC_STEP, "System RAM", local_resource);
+	 * if (phy_mem)
+	 *	printk(KERN_INFO "--- phy_mem bus fault @ 0x%lx ---\n", phy_mem);
+	 */
 
 	/* free vmalloc() area */
 	vfree(local_resource);
