@@ -1,11 +1,12 @@
-### ldd3-skull-revisited
+### LDD3 skull/scull experimental
 
 Here, the original skull driver by Alessandro Rubini and Jonathan Corbet (2001) is given.
 
 Also the revisited version by the author:
 
-	skull_genesis	==>> Alessandro Rubini and Jonathan Corbet (2001)
-	skull_revisited	==>> Zoran Stojsavljevic (2020)
+	skull_genesis		==>> Alessandro Rubini and Jonathan Corbet (2001)
+	skull_revisited		==>> Zoran Stojsavljevic (2020)
+	skull_experimental	==>> Zoran Stojsavljevic (2020)
 
 It is just an attempt to make this code alive, since from Year 2011 this code was obsolete,
 due to the numerous Linux kernel API changes.
@@ -21,5 +22,12 @@ silicons, inevitable.
 
 Any suggestions, addendums, code improvement, or another functional suggestion of the presented
 code are very welcome.
+
+### Added more scull drivers examples
+
+	scull_experimental	==>> Alessandro Rubini and Jonathan Corbet (2001)
+	scull_genesis		==>> Zoran Stojsavljevic (2020)
+
+For continuing/ongoing experimenting...
 
 Author
